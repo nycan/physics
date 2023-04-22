@@ -37,8 +37,10 @@ impl App{
 
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+        const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
 
         let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0-50.0, 50.0);
+        let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0, 30.0);
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
@@ -46,6 +48,9 @@ impl App{
 
             //Draw the rocket
             rectangle(BLACK, square, c.transform, gl);
+            if (self.time<=100) && (self.enable_thrust) {
+                rectangle(ORANGE, flame, c.transform, gl);
+            }
         });
     }
     fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
