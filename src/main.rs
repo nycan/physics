@@ -6,7 +6,7 @@ extern crate piston;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::{EventSettings, Events};
-use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
+use piston::input::*;
 use piston::window::WindowSettings;
 
 pub struct App {
@@ -29,6 +29,7 @@ pub struct App {
     enable_thrust:bool,
     enable_drag:bool,
     enable_gravity:bool,
+    paused:bool,
 }
 
 impl App{
@@ -53,9 +54,9 @@ impl App{
             }
         });
     }
+
     fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
-        
-        if self.height < 0.0 {
+        if (self.height < 0.0) || (self.paused) {
             return;
         }
 
@@ -71,6 +72,17 @@ impl App{
         }
 
         self.time += 1;
+    }
+
+    fn pause(&mut self){
+        self.paused = !self.paused;
+    }
+
+    fn reset(&mut self){
+        self.mass = 0.2;
+        self.velocity = 0.0;
+        self.height = 0.0;
+        self.time = 0;
     }
 }
 
@@ -96,6 +108,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
+        paused: false,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
@@ -105,6 +118,14 @@ fn main() {
 
         if let Some(args) = e.update_args() {
             app.update(&args);
+        }
+
+        if let Some(Button::Keyboard(key)) = e.press_args(){
+            if key == Key::Space {
+                app.pause();
+            } else if key == Key::R {
+                app.reset();
+            }
         }
     }
 }
