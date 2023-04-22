@@ -41,7 +41,7 @@ impl App{
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
-        let square = rectangle::square(args.window_size[0]/2.0, args.window_size[1]-self.height-50.0, 50.0);
+        let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0-50.0, 50.0);
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
