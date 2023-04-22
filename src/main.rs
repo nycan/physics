@@ -9,9 +9,6 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
-// Test comment
-
-
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
