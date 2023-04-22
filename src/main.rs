@@ -39,7 +39,7 @@ impl App{
             // Clear the screen.
             clear(WHITE, gl);
 
-            //draw the rocket
+            //Draw the rocket
             rectangle(BLACK, square, c.transform, gl);
         });
     }
