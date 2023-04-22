@@ -85,6 +85,18 @@ impl App{
         self.height = 0.0;
         self.time = 0;
     }
+
+    fn toggle_thrust(&mut self){
+        self.enable_thrust = !self.enable_thrust;
+    }
+
+    fn toggle_drag(&mut self){
+        self.enable_drag = !self.enable_drag;
+    }
+
+    fn toggle_gravity(&mut self){
+        self.enable_gravity = !self.enable_gravity;
+    }
 }
 
 fn main() {
@@ -127,6 +139,12 @@ fn main() {
                 app.pause();
             } else if key == Key::R {
                 app.reset();
+            } else if key == Key::T {
+                app.toggle_thrust();
+            } else if key == Key::D {
+                app.toggle_drag();
+            } else if key == Key::G {
+                app.toggle_gravity();
             }
         }
     }
