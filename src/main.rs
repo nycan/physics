@@ -29,6 +29,7 @@ pub struct App {
     enable_thrust:bool,
     enable_drag:bool,
     enable_gravity:bool,
+    thrust_time:i32,
 }
 
 impl App{
@@ -48,7 +49,7 @@ impl App{
 
             //Draw the rocket
             rectangle(BLACK, square, c.transform, gl);
-            if (self.time<=100) && (self.enable_thrust) {
+            if (self.time<=self.thrust_time) && (self.enable_thrust) {
                 rectangle(ORANGE, flame, c.transform, gl);
             }
         });
@@ -65,7 +66,7 @@ impl App{
             -0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
 
-        if (self.time<=100) && (self.enable_thrust){
+        if (self.time<=self.thrust_time) && (self.enable_thrust){
             self.velocity += 0.01 * (self.mass_flow_rate*self.exhaust_velocity/self.mass);
             self.mass -= 0.01 * self.mass_flow_rate;
         }
@@ -96,6 +97,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
+        thrust_time: 150,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
