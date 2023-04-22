@@ -9,6 +9,9 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
+// Test comment
+
+
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -24,6 +27,11 @@ pub struct App {
     G:f64,
     mass_flow_rate:f64,
     air_density:f64,
+
+    // Settings
+    enable_thrust:bool,
+    enable_drag:bool,
+    enable_gravity:bool,
 }
 
 impl App{
@@ -51,10 +59,11 @@ impl App{
 
         self.height += 0.01*self.velocity;
         self.velocity += 0.01 * (
-            -self.G-0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass
+            -self.G*(if self.enable_gravity {1.0} else { 0.0 })
+            -0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
 
-        if self.time<=100 {
+        if (self.time<=100) && (self.enable_thrust){
             self.velocity += 0.01 * (self.mass_flow_rate*self.exhaust_velocity/self.mass);
             self.mass -= 0.01 * self.mass_flow_rate;
         }
@@ -82,6 +91,9 @@ fn main() {
         mass_flow_rate: 0.01,
         air_density: 1.3,
         time: 0,
+        enable_thrust: true,
+        enable_drag: true,
+        enable_gravity: true,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
