@@ -19,12 +19,12 @@ pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
     mass:f64,
-    velocity:f64,
-    height:f64,
+    velocity:[f64;2],
+    pos:[f64;2],
     time:i32,
 
     // Constants
-    exhaust_velocity:f64,
+    exhaust_velocity:[f64;2],
     drag_coeff:f64,
     cross_section:f64,
     mass_flow_rate:f64,
@@ -46,65 +46,63 @@ impl App{
         const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
-        let scale = 1.0_f64.min(((args.window_size[1]-75.0)/(5.0*self.height)).abs());
-        let square = rectangle::square(
-            args.window_size[0]/2.0-25.0*scale, args.window_size[1]-(self.height*5.0+50.0)*scale, 50.0*scale);
+        let scale = 1.0_f64
+            .min(((args.window_size[1]-75.0)/(5.0*self.pos[1])).abs())
+            .min(((args.window_size[0]/2.0-50.0)/(5.0*self.pos[0].abs())).abs());
+        let rocket = rectangle::square(
+            args.window_size[0]/2.0-25.0*scale+self.pos[0]*5.0*scale,
+            args.window_size[1]-(self.pos[1]*5.0+50.0)*scale,50.0*scale
+        );
         let flame = rectangle::square(
-            args.window_size[0]/2.0-15.0*scale, args.window_size[1]-self.height*5.0*scale, 30.0*scale);
+            args.window_size[0]/2.0-15.0*scale+self.pos[0]*5.0*scale,
+            args.window_size[1]-self.pos[1]*5.0*scale, 30.0*scale
+        );
+        let ground = [0.0, args.window_size[1], args.window_size[0], -20.0*scale];
         
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
             clear(WHITE, gl);
 
-            rectangle(GREEN, [0.0, args.window_size[1], args.window_size[0], -20.0*scale], c.transform, gl);
-            rectangle(BLACK, square, c.transform, gl);
+            rectangle(GREEN, ground, c.transform, gl);
+            rectangle(BLACK, rocket, c.transform, gl);
             if (self.time<=self.thrust_time) && (self.enable_thrust) {
                 rectangle(ORANGE, flame, c.transform, gl);
             }
         });
     }
 
-    fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
-        if (self.height < 0.0) || (self.paused) {
+    fn update(&mut self, _args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+        if (self.pos[1] < 0.0) || (self.paused) {
             return;
         }
 
-        let temp = SURFACE_TEMP - 0.0065*(self.height+SURFACE-EARTH_SEA_RADIUS);
-        let density = air_density(self.height+SURFACE, temp);
-        self.height += 0.01*self.velocity;
-        self.velocity += 0.01 * (
-            -earth_gravity(self.height+SURFACE)*(if self.enable_gravity {1.0} else { 0.0 })
-            -0.5*density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
+        let temp = SURFACE_TEMP - 0.0065*(self.pos[1]+SURFACE-EARTH_SEA_RADIUS);
+        let density = air_density(self.pos[1]+SURFACE, temp);
+        self.pos[0] += 0.01*self.velocity[0];
+        self.pos[1] += 0.01*self.velocity[1];
+        self.velocity[0] += 0.01 * (
+            -0.5*density*self.velocity[0]*self.velocity[0]*self.drag_coeff*self.cross_section/self.mass
+            *(if self.enable_drag {1.0} else {0.0})
+        );
+        self.velocity[1] += 0.01 * (
+            -earth_gravity(self.pos[1]+SURFACE)*(if self.enable_gravity {1.0} else { 0.0 })
+            -0.5*density*self.velocity[1]*self.velocity[1]*self.drag_coeff*self.cross_section/self.mass
+            *(if self.enable_drag {1.0} else {0.0})
         );
         if (self.time<=self.thrust_time) && (self.enable_thrust){
-            self.velocity += 0.01 * (self.mass_flow_rate*self.exhaust_velocity/self.mass);
+            self.velocity[0] += 0.01 * (self.mass_flow_rate*self.exhaust_velocity[0]/self.mass);
+            self.velocity[1] += 0.01 * (self.mass_flow_rate*self.exhaust_velocity[1]/self.mass);
             self.mass -= 0.01 * self.mass_flow_rate;
         }
 
         self.time += 1;
     }
 
-    fn pause(&mut self){
-        self.paused = !self.paused;
-    }
-
     fn reset(&mut self){
         self.mass = 0.2;
-        self.velocity = 0.0;
-        self.height = 0.0;
+        self.velocity = [0.0, 0.0];
+        self.pos = [0.0, 0.0];
         self.time = 0;
-    }
-
-    fn toggle_thrust(&mut self){
-        self.enable_thrust = !self.enable_thrust;
-    }
-
-    fn toggle_drag(&mut self){
-        self.enable_drag = !self.enable_drag;
-    }
-
-    fn toggle_gravity(&mut self){
-        self.enable_gravity = !self.enable_gravity;
     }
 }
 
@@ -118,9 +116,9 @@ fn main() {
     let mut app = App {
         gl: GlGraphics::new(opengl),
         mass: 0.2,
-        velocity: 0.0,
-        height: 0.0,
-        exhaust_velocity: 650.0,
+        velocity: [0.0, 0.0],
+        pos: [0.0, 0.0],
+        exhaust_velocity: [0.0,650.0],
         drag_coeff: 0.1,
         cross_section: 0.01,
         mass_flow_rate: 0.01,
@@ -143,11 +141,13 @@ fn main() {
 
         if let Some(Button::Keyboard(key)) = e.press_args(){
             match key{
-                Key::Space => app.pause(),
                 Key::R => app.reset(),
-                Key::T => app.toggle_thrust(),
-                Key::D => app.toggle_drag(),
-                Key::G => app.toggle_gravity(),
+                Key::Space => app.paused = !app.paused,
+                Key::Left => app.exhaust_velocity[0] -= 100.0,
+                Key::Right => app.exhaust_velocity[0] += 100.0,
+                Key::T => app.enable_thrust = !app.enable_thrust,
+                Key::D => app.enable_drag = !app.enable_drag,
+                Key::G => app.enable_gravity = !app.enable_gravity,
                 _ => {}
             }
         }
