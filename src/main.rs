@@ -109,6 +109,8 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
+        thrust_time: 150,
+        paused: false,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
