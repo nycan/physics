@@ -46,7 +46,6 @@ impl App{
 
         let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0})-50.0, 50.0);
         let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0}), 30.0);
-        
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
@@ -132,7 +131,7 @@ fn main() {
         enable_gravity: true,
         thrust_time: 150,
         paused: false,
-        large_mode: true,
+        large_mode: false,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
