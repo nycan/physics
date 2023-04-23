@@ -4,7 +4,7 @@ pub const LIGHT_SPEED:f64 = 299792458.0;
 pub const EARTH_SEA_RADIUS:f64 = 6378137.0;
 pub const ROOM_TEMP:f64 = 288.15;
 
-pub fn gravity(mass:f64, distance:f64){
+pub fn gravity(mass:f64, distance:f64) -> f64{
     GRAVITY*mass/distance.powi(2)
 }
 
