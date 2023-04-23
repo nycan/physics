@@ -9,8 +9,12 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
 
-const gravity:f64 = 398584628000000.0;
-const surface:f64 = 6371000.0;
+mod formulas;
+use formulas::*;
+
+const SURFACE_TEMP: f64 = ROOM_TEMP;
+const SURFACE: f64 = EARTH_SEA_RADIUS;
+
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -23,9 +27,7 @@ pub struct App {
     exhaust_velocity:f64,
     drag_coeff:f64,
     cross_section:f64,
-    gravity:f64,
     mass_flow_rate:f64,
-    air_density:f64,
 
     // Settings
     enable_thrust:bool,
@@ -59,18 +61,18 @@ impl App{
         });
     }
 
-    fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+    fn update(&mut self, _args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
         if (self.height < 0.0) || (self.paused) {
             return;
         }
 
-        self.gravity = gravity/(surface+self.height).powi(2);
+        let temp = SURFACE_TEMP - 0.0065*(self.height+SURFACE-EARTH_SEA_RADIUS);
+        let density = air_density(self.height+SURFACE, temp);
         self.height += 0.01*self.velocity;
         self.velocity += 0.01 * (
-            -self.gravity*(if self.enable_gravity {1.0} else { 0.0 })
-            -0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
+            -earth_gravity(self.height+SURFACE)*(if self.enable_gravity {1.0} else { 0.0 })
+            -0.5*density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
-
         if (self.time<=self.thrust_time) && (self.enable_thrust){
             self.velocity += 0.01 * (self.mass_flow_rate*self.exhaust_velocity/self.mass);
             self.mass -= 0.01 * self.mass_flow_rate;
@@ -122,9 +124,7 @@ fn main() {
         exhaust_velocity: 650.0,
         drag_coeff: 0.1,
         cross_section: 0.01,
-        gravity: 9.8,
         mass_flow_rate: 0.01,
-        air_density: 1.3,
         time: 0,
         enable_thrust: true,
         enable_drag: true,
@@ -144,18 +144,14 @@ fn main() {
         }
 
         if let Some(Button::Keyboard(key)) = e.press_args(){
-            if key == Key::Space {
-                app.pause();
-            } else if key == Key::R {
-                app.reset();
-            } else if key == Key::T {
-                app.toggle_thrust();
-            } else if key == Key::D {
-                app.toggle_drag();
-            } else if key == Key::G {
-                app.toggle_gravity();
-            } else if key == Key::L {
-                app.toggle_large_mode();
+            match key{
+                Key::Space => app.pause(),
+                Key::R => app.reset(),
+                Key::T => app.toggle_thrust(),
+                Key::D => app.toggle_drag(),
+                Key::G => app.toggle_gravity(),
+                Key::L => app.toggle_large_mode(),
+                _ => {}
             }
         }
     }
