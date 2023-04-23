@@ -9,19 +9,20 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
 
+#[allow(dead_code)]
 mod formulas;
 use formulas::*;
 
 const SURFACE_TEMP: f64 = ROOM_TEMP;
 const SURFACE: f64 = EARTH_SEA_RADIUS;
 
-pub struct App {
+pub struct Rocket {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
     mass:f64,
     velocity:[f64;2],
     pos:[f64;2],
-    time:i32,
+    time:f64,
 
     // Constants
     exhaust_velocity:[f64;2],
@@ -33,11 +34,12 @@ pub struct App {
     enable_thrust:bool,
     enable_drag:bool,
     enable_gravity:bool,
-    thrust_time:i32,
+    thrust_time:f64,
     paused:bool,
+    time_delta:f64,
 }
 
-impl App{
+impl Rocket{
     fn render(&mut self, args: &RenderArgs){
         use graphics::*;
 
@@ -71,38 +73,41 @@ impl App{
         });
     }
 
-    fn update(&mut self, _args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+    fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+        self.time_delta = args.dt;
+        println!("{}", self.time_delta);
+        
         if (self.pos[1] < 0.0) || (self.paused) {
             return;
         }
 
         let temp = SURFACE_TEMP - 0.0065*(self.pos[1]+SURFACE-EARTH_SEA_RADIUS);
         let density = air_density(self.pos[1]+SURFACE, temp);
-        self.pos[0] += 0.01*self.velocity[0];
-        self.pos[1] += 0.01*self.velocity[1];
-        self.velocity[0] += 0.01 * (
+        self.pos[0] += self.time_delta*self.velocity[0];
+        self.pos[1] += self.time_delta*self.velocity[1];
+        self.velocity[0] += self.time_delta * (
             -0.5*density*self.velocity[0]*self.velocity[0]*self.drag_coeff*self.cross_section/self.mass
             *(if self.enable_drag {1.0} else {0.0})
         );
-        self.velocity[1] += 0.01 * (
+        self.velocity[1] += self.time_delta * (
             -earth_gravity(self.pos[1]+SURFACE)*(if self.enable_gravity {1.0} else { 0.0 })
             -0.5*density*self.velocity[1]*self.velocity[1]*self.drag_coeff*self.cross_section/self.mass
             *(if self.enable_drag {1.0} else {0.0})
         );
         if (self.time<=self.thrust_time) && (self.enable_thrust){
-            self.velocity[0] += 0.01 * (self.mass_flow_rate*self.exhaust_velocity[0]/self.mass);
-            self.velocity[1] += 0.01 * (self.mass_flow_rate*self.exhaust_velocity[1]/self.mass);
-            self.mass -= 0.01 * self.mass_flow_rate;
+            self.velocity[0] += self.time_delta * (self.mass_flow_rate*self.exhaust_velocity[0]/self.mass);
+            self.velocity[1] += self.time_delta * (self.mass_flow_rate*self.exhaust_velocity[1]/self.mass);
+            self.mass -= self.time_delta * self.mass_flow_rate;
         }
 
-        self.time += 1;
+        self.time += self.time_delta;
     }
 
     fn reset(&mut self){
         self.mass = 0.2;
         self.velocity = [0.0, 0.0];
         self.pos = [0.0, 0.0];
-        self.time = 0;
+        self.time = 0.0;
     }
 }
 
@@ -113,7 +118,7 @@ fn main() {
         WindowSettings::new("vroooom", [640, 480])
         .graphics_api(opengl).exit_on_esc(true).build().unwrap();
 
-    let mut app = App {
+    let mut rocket = Rocket {
         gl: GlGraphics::new(opengl),
         mass: 0.2,
         velocity: [0.0, 0.0],
@@ -122,32 +127,33 @@ fn main() {
         drag_coeff: 0.1,
         cross_section: 0.01,
         mass_flow_rate: 0.01,
-        time: 0,
+        time: 0.0,
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
-        thrust_time: 450,
+        thrust_time: 4.5,
         paused: false,
+        time_delta: 0.01,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
         if let Some(args) = e.render_args() {
-            app.render(&args);
+            rocket.render(&args);
         }
 
         if let Some(args) = e.update_args() {
-            app.update(&args);
+            rocket.update(&args);
         }
 
         if let Some(Button::Keyboard(key)) = e.press_args(){
             match key{
-                Key::R => app.reset(),
-                Key::Space => app.paused = !app.paused,
-                Key::Left => app.exhaust_velocity[0] -= 100.0,
-                Key::Right => app.exhaust_velocity[0] += 100.0,
-                Key::T => app.enable_thrust = !app.enable_thrust,
-                Key::D => app.enable_drag = !app.enable_drag,
-                Key::G => app.enable_gravity = !app.enable_gravity,
+                Key::R => rocket.reset(),
+                Key::Space => rocket.paused = !rocket.paused,
+                Key::Left => rocket.exhaust_velocity[0] -= 100.0,
+                Key::Right => rocket.exhaust_velocity[0] += 100.0,
+                Key::T => rocket.enable_thrust = !rocket.enable_thrust,
+                Key::D => rocket.enable_drag = !rocket.enable_drag,
+                Key::G => rocket.enable_gravity = !rocket.enable_gravity,
                 _ => {}
             }
         }
