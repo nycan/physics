@@ -121,11 +121,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
-<<<<<<< HEAD
         thrust_time: 150,
-=======
-        thrust_time: 100,
->>>>>>> 2fa6b9247d1ed90e740a1061dfc61dc5da36ec29
         paused: false,
     };
     let mut events = Events::new(EventSettings::new());
