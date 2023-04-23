@@ -10,7 +10,8 @@ use piston::input::*;
 use piston::window::WindowSettings;
 
 const gravity:f64 = 398584628000000.0;
-const surface:f64 = 6371000.0;
+const surface:f64 = 6378137.0;
+const surface_temp:f64 = 288.15;
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -23,9 +24,7 @@ pub struct App {
     exhaust_velocity:f64,
     drag_coeff:f64,
     cross_section:f64,
-    gravity:f64,
     mass_flow_rate:f64,
-    air_density:f64,
 
     // Settings
     enable_thrust:bool,
@@ -65,11 +64,14 @@ impl App{
             return;
         }
 
-        self.gravity = gravity/(surface+self.height).powi(2);
+        let grav = gravity/(surface+self.height).powi(2);
+        let temp = surface_temp - 0.0065*(self.height+surface-6378137.0);
+        let pressure = 101325.0 * (1.0-grav*self.height/289510.047).powf(3.50057557);
+        let density = pressure/(287.05*temp);
         self.height += 0.01*self.velocity;
         self.velocity += 0.01 * (
-            -self.gravity*(if self.enable_gravity {1.0} else { 0.0 })
-            -0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
+            -grav*(if self.enable_gravity {1.0} else { 0.0 })
+            -0.5*density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
 
         if (self.time<=self.thrust_time) && (self.enable_thrust){
@@ -123,16 +125,14 @@ fn main() {
         exhaust_velocity: 650.0,
         drag_coeff: 0.1,
         cross_section: 0.01,
-        gravity: 9.8,
         mass_flow_rate: 0.01,
-        air_density: 1.3,
         time: 0,
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
         thrust_time: 150,
         paused: false,
-        large_mode: true,
+        large_mode: false,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
