@@ -34,7 +34,6 @@ pub struct App {
     enable_drag:bool,
     enable_gravity:bool,
     thrust_time:i32,
-    large_mode: bool,
     paused:bool,
 }
 
@@ -45,6 +44,7 @@ impl App{
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
         const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
+        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
         let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0})-50.0, 50.0);
         let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0}), 30.0);
@@ -53,7 +53,7 @@ impl App{
             // Clear the screen.
             clear(WHITE, gl);
 
-            //Draw the rocket
+            rectangle(GREEN, [0.0, args.window_size[1], args.window_size[0], -20.0*scale], c.transform, gl);
             rectangle(BLACK, square, c.transform, gl);
             if (self.time<=self.thrust_time) && (self.enable_thrust) {
                 rectangle(ORANGE, flame, c.transform, gl);
@@ -61,7 +61,7 @@ impl App{
         });
     }
 
-    fn update(&mut self, _args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+    fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
         if (self.height < 0.0) || (self.paused) {
             return;
         }
@@ -103,10 +103,6 @@ impl App{
     fn toggle_gravity(&mut self){
         self.enable_gravity = !self.enable_gravity;
     }
-
-    fn toggle_large_mode(&mut self){
-        self.large_mode = !self.large_mode;
-    }
 }
 
 fn main() {
@@ -129,9 +125,8 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         enable_gravity: true,
-        thrust_time: 150,
+        thrust_time: 450,
         paused: false,
-        large_mode: false,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
@@ -150,7 +145,6 @@ fn main() {
                 Key::T => app.toggle_thrust(),
                 Key::D => app.toggle_drag(),
                 Key::G => app.toggle_gravity(),
-                Key::L => app.toggle_large_mode(),
                 _ => {}
             }
         }
