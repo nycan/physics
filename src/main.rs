@@ -154,6 +154,11 @@ impl Object for IFO {
             return;
         }
 
+        if (self.pos[1] > self.pos[1]+settings.time_delta*self.velocity[1]) && !self.apoapsis_reached{
+            println!("IFO reached apoapsis at height: {}", self.pos[1]);
+            self.apoapsis_reached=true;
+        }
+
         let temp = SURFACE_TEMP - 0.0065*(self.pos[1]+SURFACE-EARTH_SEA_RADIUS);
         let density = air_density(self.pos[1]+SURFACE, temp);
         self.pos[0] += settings.time_delta*self.velocity[0];
@@ -196,6 +201,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         thrust_time: 4.5,
+        apoapsis_reached: false,
     };
 
     engine.add_object(rocket);
@@ -211,6 +217,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         thrust_time: 4.5,
+        apoapsis_reached: false,
     };
 
     let ifo:IFO = IFO {
@@ -220,6 +227,7 @@ fn main() {
         drag_coeff: 1.0,
         cross_section: 0.01,
         enable_drag: true,
+        apoapsis_reached: false,
     };
     engine.add_object(ifo);
 
