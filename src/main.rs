@@ -46,9 +46,12 @@ impl App{
         const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
-        let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0})-50.0, 50.0);
-        let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0}), 30.0);
-
+        let scale = 1.0_f64.min(((args.window_size[1]-75.0)/(5.0*self.height)).abs());
+        let square = rectangle::square(
+            args.window_size[0]/2.0-25.0*scale, args.window_size[1]-(self.height*5.0+50.0)*scale, 50.0*scale);
+        let flame = rectangle::square(
+            args.window_size[0]/2.0-15.0*scale, args.window_size[1]-self.height*5.0*scale, 30.0*scale);
+        
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
             clear(WHITE, gl);
