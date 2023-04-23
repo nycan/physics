@@ -9,9 +9,9 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
 
-const gravity:f64 = 398584628000000.0;
-const surface:f64 = 6378137.0;
-const surface_temp:f64 = 288.15;
+const GRAVITY:f64 = 398584628000000.0;
+const SURFACE:f64 = 6378137.0;
+const SURFACE_TEMP:f64 = 288.15;
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -59,13 +59,13 @@ impl App{
         });
     }
 
-    fn update(&mut self, args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
+    fn update(&mut self, _args: &UpdateArgs){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
         if (self.height < 0.0) || (self.paused) {
             return;
         }
 
-        let grav = gravity/(surface+self.height).powi(2);
-        let temp = surface_temp - 0.0065*(self.height+surface-6378137.0);
+        let grav = GRAVITY/(SURFACE+self.height).powi(2);
+        let temp = SURFACE_TEMP - 0.0065*(self.height+SURFACE-6378137.0);
         let pressure = 101325.0 * (1.0-grav*self.height/289510.047).powf(3.50057557);
         let density = pressure/(287.05*temp);
         self.height += 0.01*self.velocity;
