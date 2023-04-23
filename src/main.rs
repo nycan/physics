@@ -34,22 +34,17 @@ impl Object for Rocket{
         const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
-        let scale = 1.0_f64
-            .min(((args.window_size[1]-75.0)/(5.0*self.pos[1])).abs())
-            .min(((args.window_size[0]/2.0-50.0)/(5.0*self.pos[0].abs())).abs());
         let rocket = rectangle::square(
-            args.window_size[0]/2.0-25.0*scale+self.pos[0]*5.0*scale,
-            args.window_size[1]-(self.pos[1]*5.0+50.0)*scale,50.0*scale
+            args.window_size[0]/2.0-25.0*settings.scale+self.pos[0]*5.0*settings.scale,
+            args.window_size[1]-(self.pos[1]*5.0+50.0)*settings.scale,50.0*settings.scale
         );
         let flame = rectangle::square(
-            args.window_size[0]/2.0-15.0*scale+self.pos[0]*5.0*scale,
-            args.window_size[1]-self.pos[1]*5.0*scale, 30.0*scale
+            args.window_size[0]/2.0-15.0*settings.scale+self.pos[0]*5.0*settings.scale,
+            args.window_size[1]-self.pos[1]*5.0*settings.scale, 30.0*settings.scale
         );
-        let ground = [0.0, args.window_size[1], args.window_size[0], -20.0*scale];
+        let ground = [0.0, args.window_size[1], args.window_size[0], -20.0*settings.scale];
         
         gl.draw(args.viewport(), |c, thingy| {
-            // Clear the screen.
-            clear(WHITE, thingy);
 
             rectangle(GREEN, ground, c.transform, thingy);
             rectangle(BLACK, rocket, c.transform, thingy);
@@ -57,6 +52,11 @@ impl Object for Rocket{
                 rectangle(ORANGE, flame, c.transform, thingy);
             }
         });
+    }
+
+    fn scale(&self, args: &RenderArgs) -> f64{
+        ((args.window_size[1]-75.0)/(5.0*self.pos[1])).abs()
+        .min(((args.window_size[0]/2.0-50.0)/(5.0*self.pos[0].abs())).abs())
     }
 
     fn update(&mut self, settings:&UpdateParams){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
@@ -119,5 +119,20 @@ fn main() {
     };
 
     engine.add_object(rocket);
+
+    let rocket2 = Rocket {
+        mass: 0.2,
+        velocity: [0.0, 0.0],
+        pos: [100.0, 0.0],
+        exhaust_velocity: [0.0,650.0],
+        drag_coeff: 0.1,
+        cross_section: 0.01,
+        mass_flow_rate: 0.01,
+        enable_thrust: true,
+        enable_drag: true,
+        thrust_time: 4.5,
+    };
+
+    engine.add_object(rocket2);
     engine.run();
 }

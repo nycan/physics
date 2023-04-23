@@ -27,10 +27,12 @@ pub struct UpdateParams{
     pub time_delta:f64,
     pub paused:bool,
     pub enable_gravity:bool,
+    pub scale: f64,
 }
 
 pub trait Object{
     fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs, settings:&UpdateParams);
+    fn scale(&self, args: &RenderArgs) -> f64;
     fn update(&mut self, settings:&UpdateParams);
     fn reset(&mut self);
     fn take_input(&mut self, key:Key);
@@ -55,6 +57,7 @@ impl Engine{
                 time_delta:0.01,
                 paused:false,
                 enable_gravity:true,
+                scale:1.0,
             }
         }
     }
@@ -74,6 +77,13 @@ impl Engine{
     }
 
     fn render(&mut self, args: &RenderArgs){
+        self.settings.scale = 1.0;
+        for object in self.objects.iter_mut(){
+            self.settings.scale = self.settings.scale.min(object.scale(args));
+        }
+        self.gl.draw(args.viewport(), |c, thingy| {
+            graphics::clear([1.0,1.0,1.0,1.0], thingy);
+        });
         for object in self.objects.iter_mut(){
             object.render(&mut self.gl, args, &self.settings);
         }
