@@ -9,6 +9,8 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
 
+const gravity:f64 = 398584628000000.0;
+const surface:f64 = 6371000.0;
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -21,7 +23,7 @@ pub struct App {
     exhaust_velocity:f64,
     drag_coeff:f64,
     cross_section:f64,
-    G:f64,
+    gravity:f64,
     mass_flow_rate:f64,
     air_density:f64,
 
@@ -61,9 +63,10 @@ impl App{
             return;
         }
 
+        self.gravity = gravity/(surface+self.height).powi(2);
         self.height += 0.01*self.velocity;
         self.velocity += 0.01 * (
-            -self.G*(if self.enable_gravity {1.0} else { 0.0 })
+            -self.gravity*(if self.enable_gravity {1.0} else { 0.0 })
             -0.5*self.air_density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
 
@@ -114,7 +117,7 @@ fn main() {
         exhaust_velocity: 650.0,
         drag_coeff: 0.1,
         cross_section: 0.01,
-        G: 9.8,
+        gravity: 9.8,
         mass_flow_rate: 0.01,
         air_density: 1.3,
         time: 0,
