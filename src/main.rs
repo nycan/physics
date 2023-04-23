@@ -102,6 +102,10 @@ impl App{
     fn toggle_gravity(&mut self){
         self.enable_gravity = !self.enable_gravity;
     }
+
+    fn toggle_large_mode(&mut self){
+        self.large_mode = !self.large_mode;
+    }
 }
 
 fn main() {
@@ -151,6 +155,8 @@ fn main() {
                 app.toggle_drag();
             } else if key == Key::G {
                 app.toggle_gravity();
+            } else if key == Key::L {
+                app.toggle_large_mode();
             }
         }
     }
