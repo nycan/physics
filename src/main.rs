@@ -9,9 +9,12 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
 
-const GRAVITY:f64 = 398584628000000.0;
-const SURFACE:f64 = 6378137.0;
-const SURFACE_TEMP:f64 = 288.15;
+mod formulas;
+use formulas::*;
+
+const SURFACE_TEMP: f64 = ROOM_TEMP;
+const SURFACE: f64 = EARTH_SEA_RADIUS;
+
 pub struct App {
     gl: opengl_graphics::GlGraphics, // OpenGL drawing backend.
     // Changing variables
@@ -64,16 +67,13 @@ impl App{
             return;
         }
 
-        let grav = GRAVITY/(SURFACE+self.height).powi(2);
-        let temp = SURFACE_TEMP - 0.0065*(self.height+SURFACE-6378137.0);
-        let pressure = 101325.0 * (1.0-grav*self.height/289510.047).powf(3.50057557);
-        let density = pressure/(287.05*temp);
+        let temp = SURFACE_TEMP - 0.0065*(self.height+SURFACE-EARTH_SEA_RADIUS);
+        let density = air_density(self.height+SURFACE, temp);
         self.height += 0.01*self.velocity;
         self.velocity += 0.01 * (
-            -grav*(if self.enable_gravity {1.0} else { 0.0 })
+            -earth_gravity(self.height+SURFACE)*(if self.enable_gravity {1.0} else { 0.0 })
             -0.5*density*self.velocity*self.velocity*self.drag_coeff*self.cross_section/self.mass*(if self.enable_drag {1.0} else {0.0})
         );
-
         if (self.time<=self.thrust_time) && (self.enable_thrust){
             self.velocity += 0.01 * (self.mass_flow_rate*self.exhaust_velocity/self.mass);
             self.mass -= 0.01 * self.mass_flow_rate;
