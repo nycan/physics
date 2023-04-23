@@ -32,6 +32,7 @@ pub struct App {
     enable_drag:bool,
     enable_gravity:bool,
     thrust_time:i32,
+    large_mode: bool,
     paused:bool,
 }
 
@@ -43,8 +44,9 @@ impl App{
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
         const ORANGE: [f32; 4] = [1.0, 0.5, 0.0, 1.0];
 
-        let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0-50.0, 50.0);
-        let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0, 30.0);
+        let square = rectangle::square(args.window_size[0]/2.0-25.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0})-50.0, 50.0);
+        let flame = rectangle::square(args.window_size[0]/2.0-15.0, args.window_size[1]-self.height*5.0*(if self.large_mode{0.02}else{1.0}), 30.0);
+        
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
@@ -126,6 +128,7 @@ fn main() {
         enable_gravity: true,
         thrust_time: 150,
         paused: false,
+        large_mode: true,
     };
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
