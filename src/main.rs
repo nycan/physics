@@ -145,18 +145,14 @@ fn main() {
         }
 
         if let Some(Button::Keyboard(key)) = e.press_args(){
-            if key == Key::Space {
-                app.pause();
-            } else if key == Key::R {
-                app.reset();
-            } else if key == Key::T {
-                app.toggle_thrust();
-            } else if key == Key::D {
-                app.toggle_drag();
-            } else if key == Key::G {
-                app.toggle_gravity();
-            } else if key == Key::L {
-                app.toggle_large_mode();
+            match key{
+                Key::Space => app.pause(),
+                Key::R => app.reset(),
+                Key::T => app.toggle_thrust(),
+                Key::D => app.toggle_drag(),
+                Key::G => app.toggle_gravity(),
+                Key::L => app.toggle_large_mode(),
+                _ => {}
             }
         }
     }
