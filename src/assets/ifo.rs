@@ -18,6 +18,7 @@ pub struct IFO {
 
     // Settings
     pub enable_drag:bool,
+    pub apoapsis_reached:bool,
 }
 
 impl Object for IFO {
@@ -49,6 +50,11 @@ impl Object for IFO {
     fn update(&mut self, settings:&UpdateParams){
         if self.pos[1] < 0.0 {
             return;
+        }
+
+        if (self.pos[1] > self.pos[1]+settings.time_delta*self.velocity[1]) && !self.apoapsis_reached{
+            println!("IFO reached apoapsis at height: {}", self.pos[1]);
+            self.apoapsis_reached=true;
         }
 
         let temp = SURFACE_TEMP - 0.0065*(self.pos[1]+SURFACE-EARTH_SEA_RADIUS);

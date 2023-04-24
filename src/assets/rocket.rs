@@ -22,6 +22,7 @@ pub struct Rocket {
     pub enable_thrust:bool,
     pub enable_drag:bool,
     pub thrust_time:f64,
+    pub apoapsis_reached:bool,
 }
 
 impl Object for Rocket{
@@ -61,6 +62,11 @@ impl Object for Rocket{
     fn update(&mut self, settings:&UpdateParams){ // DE Source: https://web.mit.edu/16.unified/www/FALL/systems/Lab_Notes/traj.pdf
         if self.pos[1] < 0.0 {
             return;
+        }
+
+        if (self.pos[1] > self.pos[1]+settings.time_delta*self.velocity[1]) && !self.apoapsis_reached{
+            println!("rocket reached apoapsis at height: {}", self.pos[1]);
+            self.apoapsis_reached=true;
         }
 
         let temp = SURFACE_TEMP - 0.0065*(self.pos[1]+SURFACE-EARTH_SEA_RADIUS);

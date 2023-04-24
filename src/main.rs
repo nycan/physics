@@ -21,6 +21,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         thrust_time: 4.5,
+        apoapsis_reached: false,
     };
     engine.add_object(rocket);
 
@@ -35,6 +36,7 @@ fn main() {
         enable_thrust: true,
         enable_drag: true,
         thrust_time: 4.5,
+        apoapsis_reached: false,
     };
     engine.add_object(rocket2);
 
@@ -45,6 +47,7 @@ fn main() {
         drag_coeff: 1.0,
         cross_section: 0.01,
         enable_drag: true,
+        apoapsis_reached: false,
     };
     engine.add_object(ifo);
 
