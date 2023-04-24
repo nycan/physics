@@ -13,6 +13,8 @@ pub struct Rocket {
     pub pos:[f64;2],
 
     // Constants
+    pub init_mass:f64,
+    pub init_pos:[f64;2],
     pub exhaust_velocity:[f64;2],
     pub drag_coeff:f64,
     pub cross_section:f64,
@@ -89,9 +91,9 @@ impl Object for Rocket{
     }
 
     fn reset(&mut self){
-        self.mass = 0.2;
+        self.mass = self.init_mass;
         self.velocity = [0.0, 0.0];
-        self.pos = [0.0, 0.0];
+        self.pos = self.init_pos;
     }
 
     fn take_input(&mut self, key:Key){

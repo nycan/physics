@@ -8,7 +8,7 @@ use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::{EventSettings, Events};
 use piston::input::*;
 use piston::window::WindowSettings;
-const opengl : OpenGL = OpenGL::V3_2;
+const OPENGL : OpenGL = OpenGL::V3_2;
 
 pub const GRAVITY:f64 = 6.674e-11_f64;
 pub const EARTH_GRAVITY:f64 = 398584628000000.0;
@@ -50,8 +50,8 @@ impl Engine{
     pub fn new() -> Engine{
         Engine{
             window: WindowSettings::new("vroooom", [640, 480])
-            .graphics_api(opengl).exit_on_esc(true).build().unwrap(),
-            gl: GlGraphics::new(opengl),
+            .graphics_api(OPENGL).exit_on_esc(true).build().unwrap(),
+            gl: GlGraphics::new(OPENGL),
             objects:Vec::new(),
             settings:UpdateParams{
                 time:0.0,
@@ -83,7 +83,7 @@ impl Engine{
         for object in self.objects.iter_mut(){
             self.settings.scale = self.settings.scale.min(object.scale(args));
         }
-        self.gl.draw(args.viewport(), |c, thingy| {
+        self.gl.draw(args.viewport(), |_c, thingy| {
             graphics::clear([1.0,1.0,1.0,1.0], thingy);
         });
         for object in self.objects.iter_mut(){

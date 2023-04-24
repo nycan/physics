@@ -12,6 +12,8 @@ pub struct IFO {
     pub pos:[f64;2],
 
     // Constants
+    pub init_pos:[f64;2],
+    pub init_velocity:[f64;2],
     pub mass:f64,
     pub drag_coeff:f64,
     pub cross_section:f64,
@@ -72,8 +74,8 @@ impl Object for IFO {
     }
 
     fn reset(&mut self){
-        self.velocity=[0.0,0.0];
-        self.pos=[0.0,0.0]
+        self.velocity=self.init_velocity;
+        self.pos=self.init_pos;
     }
 
     fn take_input(&mut self, key:Key){
