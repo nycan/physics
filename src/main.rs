@@ -19,7 +19,6 @@ fn main() {
         cross_section: 0.01,
         mass_flow_rate: 0.01,
         enable_thrust: true,
-        enable_drag: true,
         thrust_time: 4.5,
         apoapsis_reached: false,
     };
@@ -34,7 +33,6 @@ fn main() {
         cross_section: 0.01,
         mass_flow_rate: 0.01,
         enable_thrust: true,
-        enable_drag: true,
         thrust_time: 4.5,
         apoapsis_reached: false,
     };
@@ -46,7 +44,6 @@ fn main() {
         pos: [-100.0,0.0],
         drag_coeff: 1.0,
         cross_section: 0.01,
-        enable_drag: true,
         apoapsis_reached: false,
     };
     engine.add_object(ifo);

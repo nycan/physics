@@ -58,6 +58,7 @@ impl Engine{
                 time_delta:0.01,
                 paused:false,
                 enable_gravity:true,
+                enable_drag:true,
                 scale:1.0,
             }
         }
