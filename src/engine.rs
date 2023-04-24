@@ -27,6 +27,7 @@ pub struct UpdateParams{
     pub time_delta:f64,
     pub paused:bool,
     pub enable_gravity:bool,
+    pub enable_drag:bool,
     pub scale: f64,
 }
 
@@ -110,6 +111,7 @@ impl Engine{
                     Key::R => self.reset(),
                     Key::Space => self.settings.paused = !self.settings.paused,
                     Key::G => self.settings.enable_gravity = !self.settings.enable_gravity,
+                    Key::D => self.settings.enable_drag = !self.settings.enable_drag,
                     _ => {}
                 }
                 for object in self.objects.iter_mut(){

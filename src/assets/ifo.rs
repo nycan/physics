@@ -17,7 +17,6 @@ pub struct IFO {
     pub cross_section:f64,
 
     // Settings
-    pub enable_drag:bool,
     pub apoapsis_reached:bool,
 }
 
@@ -64,11 +63,11 @@ impl Object for IFO {
         self.velocity[1] += settings.time_delta * (
             if settings.enable_gravity{-earth_gravity(self.pos[1]+SURFACE)} else {0.0}
             -0.5*density*self.velocity[1]*self.velocity[1]*self.drag_coeff*self.cross_section/self.mass
-            *(if self.enable_drag {1.0} else {0.0})
+            *(if self.settings.enable_drag {1.0} else {0.0})
         );
         self.velocity[0] += settings.time_delta * (
             -0.5*density*self.velocity[0]*self.velocity[0]*self.drag_coeff*self.cross_section/self.mass
-            *(if self.enable_drag {1.0} else {0.0})
+            *(if self.settings.enable_drag {1.0} else {0.0})
         );
     }
 
@@ -79,7 +78,6 @@ impl Object for IFO {
 
     fn take_input(&mut self, key:Key){
         match key{
-            Key::D => self.enable_drag = !self.enable_drag,
             _ => {},
         }
     }

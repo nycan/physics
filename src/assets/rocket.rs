@@ -20,7 +20,6 @@ pub struct Rocket {
 
     // Settings
     pub enable_thrust:bool,
-    pub enable_drag:bool,
     pub thrust_time:f64,
     pub apoapsis_reached:bool,
 }
@@ -75,12 +74,12 @@ impl Object for Rocket{
         self.pos[1] += settings.time_delta*self.velocity[1];
         self.velocity[0] += settings.time_delta * (
             -0.5*density*self.velocity[0]*self.velocity[0]*self.drag_coeff*self.cross_section/self.mass
-            *(if self.enable_drag {1.0} else {0.0})
+            *(if settings.enable_drag {1.0} else {0.0})
         );
         self.velocity[1] += settings.time_delta * (
             if settings.enable_gravity{-earth_gravity(self.pos[1]+SURFACE)} else {0.0}
             -0.5*density*self.velocity[1]*self.velocity[1]*self.drag_coeff*self.cross_section/self.mass
-            *(if self.enable_drag {1.0} else {0.0})
+            *(if settings.enable_drag {1.0} else {0.0})
         );
         if (settings.time<=self.thrust_time) && (self.enable_thrust){
             self.velocity[0] += settings.time_delta * (self.mass_flow_rate*self.exhaust_velocity[0]/self.mass);
@@ -101,7 +100,6 @@ impl Object for Rocket{
             Key::Left => self.exhaust_velocity[0] -= 100.0,
             Key::Right => self.exhaust_velocity[0] += 100.0,
             Key::T => self.enable_thrust = !self.enable_thrust,
-            Key::D => self.enable_drag = !self.enable_drag,
             _ => {},
         }
     }
