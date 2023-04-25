@@ -22,6 +22,15 @@ pub fn earth_gravity(radius:f64) -> f64 {EARTH_GRAVITY/radius.powi(2)}
 pub fn earth_pressure(radius:f64) -> f64 {101325.0 * (1.0-earth_gravity(radius)/289510.047).powf(3.50057557)}
 pub fn air_density(radius:f64, temp:f64) -> f64 {earth_pressure(radius)/(287.05*temp)}
 
+//y' = f(x,y)
+pub fn rk4_order1(function: fn(f64,f64)->f64, step: f64){
+    let k1 = f(x,y);
+    let k2 = f(x+step/2.0, y+step*k1/2.0);
+    let k3 = f(x+step/2.0, y+step*k2/2.0);
+    let k4 = f(x+step, y+step*k3);
+    h/6.0*(k1+2.0*k2+2.0*k3+k4)
+}
+
 pub struct UpdateParams{
     pub time:f64,
     pub time_delta:f64,
