@@ -14,12 +14,6 @@ pub struct Particle{
     radius: f64,
 }
 
-impl Particle{
-    fn calculate_pos(){}
-    fn calculate_velocity(){}
-    fn calculate_accelleration(){}
-}
-
 impl Object for Particle{
     fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs, settings:&UpdateParams){
         use graphics::*;

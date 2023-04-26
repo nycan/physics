@@ -22,13 +22,29 @@ pub fn earth_gravity(radius:f64) -> f64 {EARTH_GRAVITY/radius.powi(2)}
 pub fn earth_pressure(radius:f64) -> f64 {101325.0 * (1.0-earth_gravity(radius)/289510.047).powf(3.50057557)}
 pub fn air_density(radius:f64, temp:f64) -> f64 {earth_pressure(radius)/(287.05*temp)}
 
-//y' = f(x,y)
-pub fn rk4_order1(function: fn(f64,f64)->f64, step: f64){
+type order1_dx = fn(f64,f64;2)->f64;
+type order2_dx = fn(f64,f64,f64)->f64;
+
+//y' = f(x,y), returns y
+pub fn rk4_order1(dx1: order1_dx, t:f64, y:[f64;2], step: f64) -> f64{
     let k1 = f(x,y);
     let k2 = f(x+step/2.0, y+step*k1/2.0);
     let k3 = f(x+step/2.0, y+step*k2/2.0);
     let k4 = f(x+step, y+step*k3);
-    h/6.0*(k1+2.0*k2+2.0*k3+k4)
+    y+h/6.0*(k1+2.0*k2+2.0*k3+k4)
+}
+
+//y'' = f(x,y,y'), returns [y,y']
+pub fn rk4_order2(dx2: fn(f64,f64,f64)->f64,  x:f64, y:f64, dy:f64, step:f64) -> [f64;2]{
+    let k1 = dy;
+    let l1 = dx2(x,y,dy);
+    let k2 = dy+0.5*l1;
+    let l2 = dx2(x+0.5*step, y+0.5*k1, dy+0.5*l1);
+    let k3 = dy+0.5*l2;
+    let l3 = dx2(x+0.5*step, y+0.5*k2, dy+0.5*l2);
+    let k4 = dy+l3;
+    let l4 = dx2(x+step, y+k3, dy+l3);
+    [y+step/6.0*(k1+2.0*k2+2.0*k3+k4), dy+step/6.0*(l1+2.0*l2+2.0*l3+l4)]
 }
 
 pub struct UpdateParams{
