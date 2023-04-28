@@ -75,12 +75,12 @@ impl Object for Rocket{
         self.pos[0] += settings.time_delta*self.velocity[0];
         self.pos[1] += settings.time_delta*self.velocity[1];
         self.velocity[0] += settings.time_delta * (
-            -0.5*density*self.velocity[0]*self.velocity[0]*self.drag_coeff*self.cross_section/self.mass
+            -0.5*density*self.velocity[0]*self.velocity[0].abs()*self.drag_coeff*self.cross_section/self.mass
             *(if settings.enable_drag {1.0} else {0.0})
         );
         self.velocity[1] += settings.time_delta * (
             if settings.enable_gravity{-earth_gravity(self.pos[1]+SURFACE)} else {0.0}
-            -0.5*density*self.velocity[1]*self.velocity[1]*self.drag_coeff*self.cross_section/self.mass
+            -0.5*density*self.velocity[1]*self.velocity[1].abs()*self.drag_coeff*self.cross_section/self.mass
             *(if settings.enable_drag {1.0} else {0.0})
         );
         if (settings.time<=self.thrust_time) && (self.enable_thrust){
